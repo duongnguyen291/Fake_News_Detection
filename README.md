@@ -2,7 +2,7 @@
 
 This project is the **Capstone Project** for **Machine Learning & Data Mining (IT3191E)** course in **2024.2** semester at **Hanoi University of Science and Technology (HUST)**.
 
-## 🔍 Objective
+## Objective
 
 We experimented with and compared the performance of various pre-trained transformer models:
 
@@ -15,7 +15,7 @@ We experimented with and compared the performance of various pre-trained transfo
 
 All models were fine-tuned on labeled datasets for fake news detection, and evaluated using common classification metrics.
 
-## 🏗️ Technologies & Frameworks
+## Technologies & Frameworks
 
 - Python 3.8+
 - PyTorch / Transformers (by HuggingFace)
@@ -23,7 +23,7 @@ All models were fine-tuned on labeled datasets for fake news detection, and eval
 - Pandas / NumPy
 - Jupyter Notebook
 
-## 👥 Group Information
+## Group Information
 
 **Instructor:** Ph.D. Nguyen Duc Anh  
 **Group:** 1  
