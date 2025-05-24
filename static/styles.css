@@ -1,0 +1,138 @@
+:root {
+    --primary-color: #333;
+    --background-color: #ffffff;
+    --container-bg: #f8f8f8;
+    --text-color: #000000;
+    --border-color: #ddd;
+    --success-bg: #e6ffe6;
+    --success-border: #ccffcc;
+    --error-bg: #ffe6e6;
+    --error-border: #ffcccc;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    background-color: var(--container-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-size: 2.2em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+textarea {
+    height: 150px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+#result {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 6px;
+    display: none;
+}
+
+.fake {
+    background-color: var(--error-bg);
+    border: 2px solid var(--error-border);
+}
+
+.real {
+    background-color: var(--success-bg);
+    border: 2px solid var(--success-border);
+}
+
+.loading {
+    text-align: center;
+    display: none;
+    margin: 20px 0;
+}
+
+.loading:after {
+    content: "...";
+    animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: "."; }
+    40% { content: ".."; }
+    60%, 100% { content: "..."; }
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.confidence-meter {
+    height: 8px;
+    background-color: #ddd;
+    border-radius: 4px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.confidence-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+} 

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detection</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Fake News Detection</h1>
+        <form id="detection-form">
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    {% for category in categories %}
+                    <option value="{{ category }}">{{ category|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="model">Model:</label>
+                <select id="model" name="model_type" required>
+                    {% for model in model_types %}
+                    <option value="{{ model }}">{{ model|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="text">Text to analyze:</label>
+                <textarea id="text" name="text" required placeholder="Enter the text you want to analyze..."></textarea>
+            </div>
+
+            <button type="submit">Analyze</button>
+        </form>
+
+        <div class="loading">
+            Analyzing
+        </div>
+
+        <div id="result">
+            <div class="result-header">
+                <h3>Result</h3>
+                <span id="model-used"></span>
+            </div>
+            <p><strong>Prediction:</strong> <span id="prediction"></span></p>
+            <div class="confidence-meter">
+                <div id="confidence-bar" class="confidence-bar" style="width: 0%"></div>
+            </div>
+            <p><strong>Confidence:</strong> <span id="confidence"></span>%</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('detection-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const loading = document.querySelector('.loading');
+            const result = document.getElementById('result');
+            
+            // Show loading, hide result
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Update result
+                document.getElementById('prediction').textContent = data.prediction.toUpperCase();
+                document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(2);
+                document.getElementById('model-used').textContent = data.model_used;
+                document.getElementById('confidence-bar').style.width = `${data.confidence * 100}%`;
+                
+                // Style result based on prediction
+                result.className = data.prediction.toLowerCase() === 'fake' ? 'fake' : 'real';
+                
+                // Show result
+                result.style.display = 'block';
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 
