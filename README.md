@@ -1,25 +1,44 @@
 # Fake News Detection
 
-This project is the **Capstone Project** for **Machine Learning & Data Mining (IT3191E)** course in **2024.2** semester at **Hanoi University of Science and Technology (HUST)**.
+This project is the **Capstone Project** for the **Machine Learning & Data Mining (IT3191E)** course at **Hanoi University of Science and Technology (HUST)**, semester 2024.2.
+
+---
 
 ## Objective
 
-We experimented with and compared the performance of various pre-trained transformer models:
+We developed a fake news detection system leveraging transformer-based language models fine-tuned on multi-domain datasets. The project investigates three training strategies:
 
-- **BERT** (Bidirectional Encoder Representations from Transformers)
-- **RoBERTa** (Robustly Optimized BERT Pretraining Approach)
-- **DeBERTa** (Decoding-enhanced BERT with disentangled attention)
-- **XLNet** (Generalized Autoregressive Pretraining for Language Understanding)
-- **XLM-RoBERTa** (Cross-lingual Language Model based on RoBERTa)
-- **ELECTRA** (Efficiently Learning an Encoder that Classifies Token Replacements Accurately)
+- **Domain-Specific Fine-Tuning (DSFT)**  
+- **Pooled-Domain Fine-Tuning (PDFT)**  
+- **Domain-Matched Ensemble (DME)**
+  
+## Models & Datasets
 
-All models were fine-tuned on labeled datasets for fake news detection, and evaluated using common classification metrics.
+We evaluated the following pretrained models:
+
+- **RoBERTa** (roberta-base)  
+- **XLNet** (xlnet-base-cased)  
+- **DeBERTa** (deberta-v3-base)
+
+Training and evaluation were conducted on:
+
+- **COVID-19 Fake News Dataset**
+- **FakeNewsNet** (GossipCop & PolitiFact)
+- **LIAR**
+
+## Key Takeaways
+
+- Domain-specific models excel within their respective contexts.
+- Pooled training provides broader generalization.
+- The ensemble strategy improves overall robustness and precision.
+
+---
 
 ## Installation Guide
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.8+
 - pip (Python package installer)
 - Docker (optional)
 
@@ -27,11 +46,11 @@ All models were fine-tuned on labeled datasets for fake news detection, and eval
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
+git clone "https://github.com/duongnguyen291/Fake_News_Detection"
 cd Fake_News_Detection
 ```
 
-2. Create and activate a virtual environment (recommended):
+2. Create and activate a virtual environment **(recommended)**:
 ```bash
 # Windows
 python -m venv venv
@@ -76,15 +95,17 @@ The application will be available at `http://localhost:8000`
 
 ```
 Fake_News_Detection/
-├── main.py              # FastAPI application
-├── requirements.txt     # Python dependencies
-├── Dockerfile          # Docker configuration
-├── .dockerignore       # Docker ignore file
-├── static/             # Static files (CSS, JS)
-├── templates/          # HTML templates
-└── model/             # Model files
-    ├── Combined/      # Combined dataset models
-    └── OneDataset/    # Individual dataset models
+├── docs/                       # Project documentation
+│   ├── notebooks/              # Jupyter notebooks
+│   ├── Group1-Report-ML.pdf    # Final report
+│   └── Group1-Slide-ML.pdf     # Presentation slides
+├── static/                     # Static files (CSS, JS)
+├── templates/                  # HTML templates for FastAPI
+├── main.py                     # FastAPI entry point
+├── requirements.txt            # Python dependencies
+├── README.md                   # Project overview and guide
+├── .dockerignore               # Docker ignore config
+└── .gitignore                  # Git ignore config
 ```
 
 ### Web Interface Usage
@@ -126,7 +147,9 @@ Example Response:
 - Pandas / NumPy
 - Jupyter Notebook
 
-## Group Information
+---
+
+## Information
 
 **Instructor:** Ph.D. Nguyen Duc Anh  
 **Group:** 1  
