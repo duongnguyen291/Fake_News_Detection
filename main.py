@@ -3,7 +3,14 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import torch
-from transformers import RobertaTokenizer, XLNetTokenizer, RobertaForSequenceClassification, XLNetForSequenceClassification
+from transformers import (
+    RobertaTokenizer, 
+    XLNetTokenizer, 
+    RobertaForSequenceClassification, 
+    XLNetForSequenceClassification,
+    DebertaTokenizer,
+    DebertaForSequenceClassification
+)
 import preprocessor as p
 import re
 from pathlib import Path
@@ -23,14 +30,30 @@ tokenizers = {}
 
 # Available models and their paths
 MODEL_PATHS = {
-    "roberta_combined": "model/Combined/roberta_Combined",
+    # Combined models
+    "roberta_combined": "model/Combined/Roberta_Combined",
     "xlnet_combined": "model/Combined/XLNet_Combined.ckpt",
-    "roberta_politics": "model/OneDataset/politifact_checkpoint",
-    "xlnet_politics": "model/OneDataset/XLNet_PolitiFact.ckpt",
-    "roberta_entertainment": "model/OneDataset/gossip_checkpoint",
-    "xlnet_entertainment": "model/OneDataset/XLNet_Gossip_NoCombined.ckpt",
-    "roberta_covid": "model/OneDataset/covid_checkpoint",
-    "xlnet_covid": "model/OneDataset/XLNet_Covid.ckpt"
+    "deberta_combined": "model/Combined/Deberta_Combined",
+    
+    # Politics (PolitiFact) models
+    "roberta_politics": "model/Roberta/roberta_politifact",
+    "xlnet_politics": "model/XLNet/XLNet_PolitiFact.ckpt",
+    "deberta_politics": "model/Deberta/deberta_politifact_model",
+    
+    # Entertainment (GossipCop) models
+    "roberta_entertainment": "model/Roberta/roberta_gossip",
+    "xlnet_entertainment": "model/XLNet/XLNet_Gossip.ckpt",
+    "deberta_entertainment": "model/Deberta/deberta_gossipcop_model",
+    
+    # Covid models
+    "roberta_covid": "model/Roberta/roberta_covid",
+    "xlnet_covid": "model/XLNet/XLNet_Covid.ckpt",
+    "deberta_covid": "model/Deberta/deberta_covid_model",
+    
+    # Liar models
+    "roberta_liar": "model/Roberta/roberta_liar",
+    "xlnet_liar": "model/XLNet/XLNet_Liar.ckpt",
+    "deberta_liar": "model/Deberta/deberta_liar_model"
 }
 
 class ModelHandler:
@@ -66,8 +89,16 @@ class ModelHandler:
             prediction = torch.argmax(probabilities, dim=1)
             confidence = torch.max(probabilities)
             
+            # Handle different label mappings for RoBERTa and XLNet
+            if self.model_type == "roberta":
+                # RoBERTa: 0 = fake, 1 = real
+                prediction_label = "real" if prediction.item() == 1 else "fake"
+            else:  # xlnet
+                # XLNet: 1 = fake, 0 = real
+                prediction_label = "fake" if prediction.item() == 1 else "real"
+            
         return {
-            "prediction": "fake" if prediction.item() == 1 else "real",
+            "prediction": prediction_label,
             "confidence": confidence.item()
         }
 
@@ -97,6 +128,9 @@ def load_model(model_type: str, category: str):
         if list(state_dict.keys())[0].startswith('module.'):
             state_dict = {k[7:]: v for k, v in state_dict.items()}
         model.load_state_dict(state_dict)
+    elif model_type == "deberta":
+        # For DeBERTa, we can load directly from the directory
+        model = DebertaForSequenceClassification.from_pretrained(model_path)
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
     
@@ -118,6 +152,7 @@ async def startup_event():
     # Initialize tokenizers
     tokenizers['roberta'] = RobertaTokenizer.from_pretrained('roberta-base')
     tokenizers['xlnet'] = XLNetTokenizer.from_pretrained('xlnet-base-cased', do_lower_case=False)
+    tokenizers['deberta'] = DebertaTokenizer.from_pretrained('microsoft/deberta-v3-base')
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -127,7 +162,7 @@ async def home(request: Request):
         {
             "request": request,
             "categories": ["politics", "entertainment", "covid", "all"],
-            "model_types": ["roberta", "xlnet", "ensemble"]
+            "model_types": ["roberta", "xlnet", "deberta", "ensemble"]
         }
     )
 
@@ -145,7 +180,7 @@ async def predict(
         if model_type == "ensemble":
             # For ensemble, use both models and average results
             results = []
-            for m_type in ["roberta", "xlnet"]:
+            for m_type in ["roberta", "xlnet", "deberta"]:
                 # Get tokenizer and create handler
                 tokenizer = tokenizers[m_type]
                 handler = ModelHandler(m_type, tokenizer)
@@ -156,13 +191,13 @@ async def predict(
                 results.append(result)
             
             # Average confidences for same predictions, take max confidence if different
-            if results[0]["prediction"] == results[1]["prediction"]:
+            if results[0]["prediction"] == results[1]["prediction"] == results[2]["prediction"]:
                 final_pred = results[0]["prediction"]
-                final_conf = (results[0]["confidence"] + results[1]["confidence"]) / 2
+                final_conf = (results[0]["confidence"] + results[1]["confidence"] + results[2]["confidence"]) / 3
             else:
                 # Take prediction with higher confidence
-                final_pred = results[0]["prediction"] if results[0]["confidence"] > results[1]["confidence"] else results[1]["prediction"]
-                final_conf = max(results[0]["confidence"], results[1]["confidence"])
+                final_pred = results[0]["prediction"] if results[0]["confidence"] > results[1]["confidence"] and results[0]["confidence"] > results[2]["confidence"] else results[1]["prediction"] if results[1]["confidence"] > results[2]["confidence"] else results[2]["prediction"]
+                final_conf = max(results[0]["confidence"], results[1]["confidence"], results[2]["confidence"])
                 
             result = {
                 "prediction": final_pred,
